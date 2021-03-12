@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/test', 'TestController@test');
+Route::post('/login', 'AuthController@login');
+Route::get('/test', 'TestController@test')->middleware('jwt.auth:admin');
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
