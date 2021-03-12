@@ -14,9 +14,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/login', 'AuthController@login');
+/*
+| Testing routes
+*/
 Route::get('/test', 'TestController@test')->middleware('jwt.auth:admin');
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+/*
+| Authentication routes
+*/
+Route::post('/login', 'AuthController@login');
+
+/*
+| Admin user routes
+*/
+Route::middleware('jwt.auth:admin')->group(function () {
+    Route::prefix('/clients', function () {
+        Route::get('/', 'ClientController@list');
+    });
 });

@@ -21,8 +21,8 @@ class AuthController extends ApiController
             'iat' => time(),
             'exp' => time() + $time_expired
         ];
-
-        $jwt = JWT::encode($payload, env('JWT_SECRET'));
+        
+        return JWT::encode($payload, env('JWT_SECRET'));
     }
 
     public function login(Request $request)
@@ -46,7 +46,6 @@ class AuthController extends ApiController
                 throw new Exception('invalid_password', 401);
             }
             throw new Exception('invalid_email', 401);
-
 
         } catch(Exception $e) {
             $error = $this->getGeneralError($e);
