@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        $data = [
+        $users = [
             [
                 'name' => Str::random(10),
                 'role_id' => 2,
@@ -25,6 +25,6 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        DB::table('users')->insert($data);
+        DB::table('users')->insert($users);
     }
 }

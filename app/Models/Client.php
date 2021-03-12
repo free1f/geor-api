@@ -12,17 +12,14 @@ class Client extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id',
-        'location_id',
-        'status'
+        'concessionaire_id',
+        'status',
+        'name',
+        'last_name',
+        'identification'
     ];
 
-    public function user()
-    {
-        return $this->belongsTo('App\Models\User');
-    }
-
-    public function location()
+    public function concessionaire()
     {
         return $this->belongsTo('App\Models\User');
     }

@@ -14,7 +14,7 @@ class StateSeeder extends Seeder
      */
     public function run()
     {
-        $data = [
+        $states = [
             [
                 'name'=> 'Lima',
                 'country_id' => '1'
@@ -33,6 +33,6 @@ class StateSeeder extends Seeder
             ],
         ];
 
-        DB::table('states')->insert($data);
+        DB::table('states')->insert($states);
     }
 }

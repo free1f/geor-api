@@ -33,8 +33,8 @@ class Location extends Model
         return $this->belongsTo('App\Models\City');
     }
 
-    public function client()
+    public function concessionaire()
     {
-        return $this->hasOne('App\Models\Client');
+        return $this->hasOne('App\Models\Concessionaire');
     }
 }

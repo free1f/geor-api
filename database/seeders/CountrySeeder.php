@@ -14,7 +14,7 @@ class CountrySeeder extends Seeder
      */
     public function run()
     {
-        $data = [
+        $countries = [
             [
                 'name'=> 'Peru',
                 'abb'=> 'pe',
@@ -27,6 +27,6 @@ class CountrySeeder extends Seeder
             ],
         ];
 
-        DB::table('countries')->insert($data);
+        DB::table('countries')->insert($countries);
     }
 }

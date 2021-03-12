@@ -14,7 +14,7 @@ class CitySeeder extends Seeder
      */
     public function run()
     {
-        $data = [
+        $cities = [
             [
                 'name'=> 'Lima',
                 'state_id'=> 1
@@ -45,6 +45,6 @@ class CitySeeder extends Seeder
             ],
         ];
 
-        DB::table('cities')->insert($data);
+        DB::table('cities')->insert($cities);
     }
 }

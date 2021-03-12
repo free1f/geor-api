@@ -14,7 +14,7 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
-        $data = [
+        $roles = [
             [
                 'name'=>'vip',
                 'slug'=>'vip',
@@ -38,6 +38,6 @@ class RoleSeeder extends Seeder
             ],
         ];
 
-        DB::table('roles')->insert($data);
+        DB::table('roles')->insert($roles);
     }
 }
