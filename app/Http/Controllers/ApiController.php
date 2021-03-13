@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use App\Models\Logger;
+use Validator;
+use Exception;
+
+class ApiController extends Controller
+{
+    /**
+     * Validate fields
+     */
+    protected function validateRequest($request, $rule = '', $id = '') {
+        $rules = $this->getRules($rule, $id);
+        
+        $validator = Validator::make($request->all(), $rules);
+        
+        $errors = $validator->fails() ? $validator->errors() : [];
+        $language = request()->header('lang', 'es');
+        
+        if(count($errors)) {
+            $errors = $errors->messages();
+            
+            $stringError = '';
+
+            foreach ($errors as $key => $error) {
+                foreach ($error as $err) {
+                    if($language == 'es') {
+                        $arrayValue = explode('_', $key);
+
+                        $oldString = $this->countLabels($arrayValue);
+                        $newString = __($key);
+
+                        $replaceString = str_replace($oldString, $newString, $err);
+                        $stringError = $replaceString . ' ' . $stringError;
+                        continue;
+                    }
+                    $stringError = $err . ' ' . $stringError;
+                }
+            }
+
+            throw new Exception($stringError, 422);
+        }
+        return false;
+    }
+
+    private function countLabels($arrLabels) {
+        if(count($arrLabels) == 1) {
+            return "$arrLabels[0]";
+        }
+
+        if(count($arrLabels) == 2) {
+            return "$arrLabels[0] $arrLabels[1]";
+        }
+
+        if(count($arrLabels) == 3) {
+            return "$arrLabels[0] $arrLabels[1] $arrLabels[2]";
+        }
+    }
+
+    /**
+     * Obtain Rules Validation
+     */
+    private function getRules($flag, $id) {
+        $rule = config('rules.' . $flag);
+
+        if($id) {
+            foreach ($rule as $key => $r) {
+                if(Str::startsWith($rule[$key], 'unique')) {
+                    $rule[$key] = Str::replaceFirst('unique:users,email', 'unique:users,email,'.$id, $rule[$key]);
+              }
+            }
+        }
+
+        if(!$rule) throw new Exception('Rule does not exist', 500);
+
+        return $rule;
+    }
+
+    /**
+     * Response
+     */
+    protected function responseApi($message = null, $result = null, $code = 200, $status = 'success') {
+        return response()->json([
+            'status' => $status,
+            'result' => $result,
+            'message' => $message
+        ], $code);
+    }
+
+    /**
+     * Return Error Code in Exception
+     */
+    protected function getGeneralError($error) {
+        $code = $error->getCode();
+        $message = $error->getMessage();
+
+        if($code >= 300 && $code <= 505) {
+            return [
+                'code' => $code,
+                'message' => $message
+            ];
+        }
+
+        return [
+            'code' => 500,
+            'message' => $message
+        ];
+    }
+
+    protected function logger($action, $ip) {
+        Logger::create(['action' => $action, 'ip' => $ip]);
+    }
+}
