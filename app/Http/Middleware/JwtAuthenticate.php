@@ -2,12 +2,12 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
 use Illuminate\Http\Request;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use App\Models\User;
 use Exception;
+use Closure;
 
 class JwtAuthenticate
 {
@@ -27,6 +27,7 @@ class JwtAuthenticate
             if(!$token) throw new Exception('Token not provided', 001);
 
             $user = $this->verifyUser($token, $roles);
+            
             $request->auth = $user;
             return $next($request);
 
@@ -43,8 +44,8 @@ class JwtAuthenticate
         }
     }
 
-    private function verifyUser($token, $roles)
-    {
+    private function verifyUser($token, $roles) {
+
         $credentials = JWT::decode($token, env('JWT_SECRET'), array('HS256'));
 
         $user = User::where('id', $credentials->sub)->first();

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 /*
 | Testing routes
 */
-Route::get('/test', 'TestController@test')->middleware('jwt.auth:admin');
+Route::get('/test', 'TestController@test');
 
 /*
 | Authentication routes
@@ -32,5 +32,5 @@ Route::prefix('/clients')->middleware('jwt.auth:admin')->group(function () {
     Route::post('/', 'ClientController@create');
     Route::post('/{id}', 'ClientController@update');
     Route::delete('/{id}', 'ClientController@delete');
-    Route::get('/export-data', 'ClientController@exportPDF');
+    Route::get('/export-list', 'ClientController@exportPDF');
 });

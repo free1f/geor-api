@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\Logger;
 use Validator;
 use Exception;
 
@@ -12,8 +13,7 @@ class ApiController extends Controller
     /**
      * Validate fields
      */
-    protected function validateRequest($request, $rule = '', $id = '')
-    {
+    protected function validateRequest($request, $rule = '', $id = '') {
         $rules = $this->getRules($rule, $id);
         
         $validator = Validator::make($request->all(), $rules);
@@ -47,8 +47,7 @@ class ApiController extends Controller
         return false;
     }
 
-    private function countLabels($arrLabels)
-    {
+    private function countLabels($arrLabels) {
         if(count($arrLabels) == 1) {
             return "$arrLabels[0]";
         }
@@ -65,8 +64,7 @@ class ApiController extends Controller
     /**
      * Obtain Rules Validation
      */
-    private function getRules($flag, $id)
-    {
+    private function getRules($flag, $id) {
         $rule = config('rules.' . $flag);
 
         if($id) {
@@ -85,8 +83,7 @@ class ApiController extends Controller
     /**
      * Response
      */
-    protected function responseApi($message = null, $result = null, $code = 200, $status = 'success')
-    {
+    protected function responseApi($message = null, $result = null, $code = 200, $status = 'success') {
         return response()->json([
             'status' => $status,
             'result' => $result,
@@ -97,8 +94,7 @@ class ApiController extends Controller
     /**
      * Return Error Code in Exception
      */
-    protected function getGeneralError($error)
-    {
+    protected function getGeneralError($error) {
         $code = $error->getCode();
         $message = $error->getMessage();
 
@@ -113,5 +109,9 @@ class ApiController extends Controller
             'code' => 500,
             'message' => $message
         ];
+    }
+
+    protected function logger($action, $ip) {
+        Logger::create(['action' => $action, 'ip' => $ip]);
     }
 }

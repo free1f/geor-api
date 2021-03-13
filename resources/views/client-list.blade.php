@@ -18,8 +18,8 @@
     <main>
       <div id="details" class="clearfix">
         <div id="invoice">
-          <h1>{{ $title }}</h1>
-          <div class="date">Date: {{ $date }}</div>
+          <h1>Report</h1>
+          <div class="date">Date: {{date('F j, Y, g:i a')}}</div>
         </div>
       </div>
         @foreach($concessionaires as $concessionary)

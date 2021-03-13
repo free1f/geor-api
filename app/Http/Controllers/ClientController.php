@@ -29,8 +29,10 @@ class ClientController extends ApiController
             DB::beginTransaction();
 
             $client = Client::create($request->all());
-
+            
             DB::commit();
+            
+            $this->logger('client created', $request->ip());
 
             return $this->responseApi(null, $client);
 
@@ -52,6 +54,8 @@ class ClientController extends ApiController
 
             DB::commit();
 
+            $this->logger('client updated', $request->ip());
+
             return $this->responseApi(null, $client);
 
         } catch (Exception $e) {
@@ -62,7 +66,7 @@ class ClientController extends ApiController
         }
     }
 
-    public function delete($id) {
+    public function delete(Request $request, $id) {
         try {
             DB::beginTransaction();
 
@@ -71,6 +75,8 @@ class ClientController extends ApiController
             $client->update(['status' => 0]);
 
             DB::commit();
+
+            $this->logger('client deleted', $request->ip());
 
             return $this->responseApi(null, $client);
 
@@ -84,14 +90,23 @@ class ClientController extends ApiController
 
     public function exportPDF(Request $request) 
     {
-        $data = $this->getConcessionaires($request);
-        $concessionaires = $data->toArray();
-        $date = date('Y-m-d');
-        $title = "Report";
-        $view =  \View::make('client-list', compact('concessionaires', 'date', 'title'))->render();
-        $pdf = \App::make('dompdf.wrapper');
-        $pdf->loadHTML($view);
-        return $pdf->stream('client-list');
+        try {
+            $data = $this->getConcessionaires($request);
+            $concessionaires = $data->toArray();
+            
+            $view =  \View::make('client-list', compact('concessionaires'))->render();
+            $pdf = \App::make('dompdf.wrapper');
+            $pdf->loadHTML($view);
+
+            $this->logger('client list exported', $request->ip());
+
+            return $pdf->stream('client-list');
+
+        } catch (Exception $e) {
+            $error = $this->getGeneralError($e);
+            return $this->responseApi($error['message'], null, $error['code'], 'error');
+        }
+        
     }
 
     private function getConcessionaires($request, $status = null) {
@@ -127,7 +142,7 @@ class ClientController extends ApiController
                                         )
                                         ->with(['clients' => function($query) use ($status) {
                                             $query->when($status, function ($query, $status) {
-                                                $query->where('status', '=', $status);
+                                                $query->where('status', $status);
                                             });
                                         }])->get();
     
