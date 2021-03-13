@@ -32,4 +32,5 @@ Route::prefix('/clients')->middleware('jwt.auth:admin')->group(function () {
     Route::post('/', 'ClientController@create');
     Route::post('/{id}', 'ClientController@update');
     Route::delete('/{id}', 'ClientController@delete');
+    Route::get('/export-data', 'ClientController@exportPDF');
 });

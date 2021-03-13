@@ -10,40 +10,9 @@ use DB;
 
 class ClientController extends ApiController
 {
-    public function list(Request $request)
-    {
+    public function list(Request $request) {
         try {
-
-            $country_id = $request->country_id;
-            $state_id = $request->state_id;
-            $city_id = $request->city_id;
-
-            $concessionaires = Concessionaire::leftJoin('users', 'concessionaires.user_id', '=', 'users.id')
-                                            ->leftJoin('locations', 'concessionaires.location_id', '=', 'locations.id')
-                                            ->leftJoin('countries', 'locations.country_id', '=', 'countries.id')
-                                            ->leftJoin('states', 'locations.state_id', '=', 'states.id')
-                                            ->leftJoin('cities', 'locations.city_id', '=', 'cities.id')
-                                            ->where('user_id', $request->auth->id)
-                                            ->where('concessionaires.status', 1)
-                                            ->when($country_id, function ($query, $country_id) {
-                                                return $query->where('countries.id', $country_id);
-                                            })->when($state_id, function ($query, $state_id) {
-                                                return $query->where('states.id', $state_id);
-                                            })->when($city_id, function ($query, $city_id) {
-                                                return $query->where('cities.id', $city_id);
-                                            })
-                                            ->select('concessionaires.id',
-                                            'concessionaires.name',
-                                            'concessionaires.RIF',
-                                            'countries.name AS country',
-                                            'states.name AS state',
-                                            'cities.name AS city',
-                                            'locations.address'
-                                            )
-                                            ->with(['clients' => function($query) {
-                                                $query->where('status', '=', 1);
-                                            }])
-                                            ->get();
+            $concessionaires = $this->getConcessionaires($request, 1);
 
             return $this->responseApi(null, $concessionaires);
 
@@ -53,8 +22,7 @@ class ClientController extends ApiController
         }
     }
 
-    public function create(Request $request)
-    {
+    public function create(Request $request) {
         try {
             $this->validateRequest($request, 'client');
             
@@ -73,8 +41,7 @@ class ClientController extends ApiController
         }
     }
 
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id) {
         try {
             $this->validateRequest($request, 'client');
 
@@ -95,8 +62,7 @@ class ClientController extends ApiController
         }
     }
 
-    public function delete($id)
-    {
+    public function delete($id) {
         try {
             DB::beginTransaction();
 
@@ -114,5 +80,57 @@ class ClientController extends ApiController
             $error = $this->getGeneralError($e);
             return $this->responseApi($error['message'], null, $error['code'], 'error');
         }
+    }
+
+    public function exportPDF(Request $request) 
+    {
+        $data = $this->getConcessionaires($request);
+        $concessionaires = $data->toArray();
+        $date = date('Y-m-d');
+        $title = "Report";
+        $view =  \View::make('client-list', compact('concessionaires', 'date', 'title'))->render();
+        $pdf = \App::make('dompdf.wrapper');
+        $pdf->loadHTML($view);
+        return $pdf->stream('client-list');
+    }
+
+    private function getConcessionaires($request, $status = null) {
+
+        $location = [
+            'country_id' => $request->country_id,
+            'state_id' => $request->state_id,
+            'city_id' =>  $request->city_id
+        ];
+
+        $concessionaires = Concessionaire::leftJoin('users', 'concessionaires.user_id', '=', 'users.id')
+                                        ->leftJoin('locations', 'concessionaires.location_id', '=', 'locations.id')
+                                        ->leftJoin('countries', 'locations.country_id', '=', 'countries.id')
+                                        ->leftJoin('states', 'locations.state_id', '=', 'states.id')
+                                        ->leftJoin('cities', 'locations.city_id', '=', 'cities.id')
+                                        ->where('user_id', $request->auth->id)
+                                        ->where('concessionaires.status', 1)
+                                        ->when($location['country_id'], function ($query, $country_id) {
+                                            return $query->where('countries.id', $country_id);
+                                        })->when($location['state_id'], function ($query, $state_id) {
+                                            return $query->where('states.id', $state_id);
+                                        })->when($location['city_id'], function ($query, $city_id) {
+                                            return $query->where('cities.id', $city_id);
+                                        })
+                                        ->select('concessionaires.id',
+                                        'concessionaires.name',
+                                        'concessionaires.status',
+                                        'concessionaires.RIF',
+                                        'countries.name AS country',
+                                        'states.name AS state',
+                                        'cities.name AS city',
+                                        'locations.address'
+                                        )
+                                        ->with(['clients' => function($query) use ($status) {
+                                            $query->when($status, function ($query, $status) {
+                                                $query->where('status', '=', $status);
+                                            });
+                                        }])->get();
+    
+        return $concessionaires;
     }
 }

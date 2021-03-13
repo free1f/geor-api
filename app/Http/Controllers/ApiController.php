@@ -42,7 +42,6 @@ class ApiController extends Controller
                 }
             }
 
-            // dd($stringError);
             throw new Exception($stringError, 422);
         }
         return false;
