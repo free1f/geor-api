@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Concessionaire;
 use App\Models\Client;
+use Exception;
+use DB;
 
 class ClientController extends ApiController
 {
@@ -38,7 +40,9 @@ class ClientController extends ApiController
                                             'cities.name AS city',
                                             'locations.address'
                                             )
-                                            ->with('clients')
+                                            ->with(['clients' => function($query) {
+                                                $query->where('status', '=', 1);
+                                            }])
                                             ->get();
 
             return $this->responseApi(null, $concessionaires);
@@ -52,14 +56,61 @@ class ClientController extends ApiController
     public function create(Request $request)
     {
         try {
+            $this->validateRequest($request, 'client');
+            
+            DB::beginTransaction();
 
-            $data = $request->all();
+            $client = Client::create($request->all());
 
-            $client = Client::create($data);
+            DB::commit();
 
             return $this->responseApi(null, $client);
 
-        } catch (Excepcion $e) {
+        } catch (Exception $e) {
+            DB::rollback();
+            $error = $this->getGeneralError($e);
+            return $this->responseApi($error['message'], null, $error['code'], 'error');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $this->validateRequest($request, 'client');
+
+            DB::beginTransaction();
+
+            $client = Client::findOrFail($id);
+            $client->update($request->all());
+
+            DB::commit();
+
+            return $this->responseApi(null, $client);
+
+        } catch (Exception $e) {
+            DB::rollback();
+
+            $error = $this->getGeneralError($e);
+            return $this->responseApi($error['message'], null, $error['code'], 'error');
+        }
+    }
+
+    public function delete($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $client = Client::findOrFail($id);
+
+            $client->update(['status' => 0]);
+
+            DB::commit();
+
+            return $this->responseApi(null, $client);
+
+        } catch (Exception $e) {
+            DB::rollback();
+
             $error = $this->getGeneralError($e);
             return $this->responseApi($error['message'], null, $error['code'], 'error');
         }

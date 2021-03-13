@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Validator;
 use Exception;
@@ -14,13 +15,15 @@ class ApiController extends Controller
     protected function validateRequest($request, $rule = '', $id = '')
     {
         $rules = $this->getRules($rule, $id);
-
+        
         $validator = Validator::make($request->all(), $rules);
-
+        
         $errors = $validator->fails() ? $validator->errors() : [];
-
+        $language = request()->header('lang', 'es');
+        
         if(count($errors)) {
             $errors = $errors->messages();
+            
             $stringError = '';
 
             foreach ($errors as $key => $error) {
@@ -39,9 +42,25 @@ class ApiController extends Controller
                 }
             }
 
+            // dd($stringError);
             throw new Exception($stringError, 422);
         }
         return false;
+    }
+
+    private function countLabels($arrLabels)
+    {
+        if(count($arrLabels) == 1) {
+            return "$arrLabels[0]";
+        }
+
+        if(count($arrLabels) == 2) {
+            return "$arrLabels[0] $arrLabels[1]";
+        }
+
+        if(count($arrLabels) == 3) {
+            return "$arrLabels[0] $arrLabels[1] $arrLabels[2]";
+        }
     }
 
     /**
