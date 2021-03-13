@@ -27,8 +27,6 @@ Route::post('/login', 'AuthController@login');
 /*
 | Admin user routes
 */
-Route::middleware('jwt.auth:admin')->group(function () {
-    Route::prefix('/clients', function () {
-        Route::get('/', 'ClientController@list');
-    });
+Route::prefix('/clients')->middleware('jwt.auth:admin')->group(function () {
+    Route::get('/', 'ClientController@list');
 });
