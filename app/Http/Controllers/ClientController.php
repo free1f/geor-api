@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Concessionaire;
+use App\Models\Client;
 
 class ClientController extends ApiController
 {
@@ -34,12 +35,29 @@ class ClientController extends ApiController
                                             'concessionaires.RIF',
                                             'countries.name AS country',
                                             'states.name AS state',
-                                            'cities.name AS city'
+                                            'cities.name AS city',
+                                            'locations.address'
                                             )
                                             ->with('clients')
                                             ->get();
 
             return $this->responseApi(null, $concessionaires);
+
+        } catch (Excepcion $e) {
+            $error = $this->getGeneralError($e);
+            return $this->responseApi($error['message'], null, $error['code'], 'error');
+        }
+    }
+
+    public function create(Request $request)
+    {
+        try {
+
+            $data = $request->all();
+
+            $client = Client::create($data);
+
+            return $this->responseApi(null, $client);
 
         } catch (Excepcion $e) {
             $error = $this->getGeneralError($e);

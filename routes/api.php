@@ -29,4 +29,5 @@ Route::post('/login', 'AuthController@login');
 */
 Route::prefix('/clients')->middleware('jwt.auth:admin')->group(function () {
     Route::get('/', 'ClientController@list');
+    Route::post('/create', 'ClientController@create');
 });
