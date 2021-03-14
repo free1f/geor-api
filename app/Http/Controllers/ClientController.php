@@ -28,6 +28,7 @@ class ClientController extends ApiController
             
             DB::beginTransaction();
 
+            ;
             $client = Client::create($request->all());
             
             DB::commit();
@@ -45,7 +46,7 @@ class ClientController extends ApiController
 
     public function update(Request $request, $id) {
         try {
-            $this->validateRequest($request, 'client');
+            $this->validateRequest($request, 'client_update');
 
             DB::beginTransaction();
 
@@ -88,8 +89,7 @@ class ClientController extends ApiController
         }
     }
 
-    public function exportPDF(Request $request) 
-    {
+    public function exportPDF(Request $request) {
         try {
             $data = $this->getConcessionaires($request);
             $concessionaires = $data->toArray();
