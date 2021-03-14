@@ -19,7 +19,7 @@
       <div id="details" class="clearfix">
         <div id="invoice">
           <h1>Report</h1>
-          <div class="date">Date: {{date('F j, Y, g:i a')}}</div>
+          <div class="date">Date: {{date('F j, Y')}}</div>
         </div>
       </div>
         @foreach($concessionaires as $concessionary)

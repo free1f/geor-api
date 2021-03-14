@@ -13,8 +13,8 @@ class ApiController extends Controller
     /**
      * Validate fields
      */
-    protected function validateRequest($request, $rule = '', $id = '') {
-        $rules = $this->getRules($rule, $id);
+    protected function validateRequest($request, $rule = '') {
+        $rules = $this->getRules($rule);
         
         $validator = Validator::make($request->all(), $rules);
         
@@ -38,7 +38,7 @@ class ApiController extends Controller
     /**
      * Obtain Rules Validation
      */
-    private function getRules($flag, $id) {
+    private function getRules($flag) {
         $rule = config('rules.' . $flag);
 
         if(!$rule) throw new Exception('Rule does not exist', 500);
